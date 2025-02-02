@@ -14,9 +14,9 @@ server.listen(PORT, () => {
     console.log(`WebSocket écoute sur le port ${PORT}`);
 });
 io.on("connection", (socket) => {
-    console.log("Nouvelle connexion WebSocket établie");
+    console.log(`Nouvelle connexion : ${socket.id}`);
     socket.on("disconnect", () => {
-        console.log("Un utilisateur s'est déconnecté");
+        console.log(`Socket déconnecté : ${socket.id}`);
     });
     socket.on("joinFamily", (data) => {
         const familyId = Number(data);
@@ -25,21 +25,24 @@ io.on("connection", (socket) => {
             return;
         }
         socket.join(familyId.toString());
-        console.log(`Utilisateur rejoint la famille : ${familyId}`);
+        console.log(`Socket ${familyId} a rejoint la famille : ${familyId}`);
+        // Vérifiez les sockets dans la room
+        const socketsInRoom = io.sockets.adapter.rooms.get(familyId.toString());
+        console.log(`Sockets dans la room ${familyId}:`, socketsInRoom ? Array.from(socketsInRoom) : []);
+        // Confirmation au client
+        socket.emit("joinedFamily", { familyId });
     });
     socket.on("sendMessage", (data) => {
+        if (typeof data === 'string') {
+            data = JSON.parse(data);
+        }
         const { familyId, senderId, content } = data;
         if (!familyId || !senderId || !content) {
             console.error("Données de message invalides");
             return;
         }
         console.log(`Message reçu : ${content} de ${senderId} pour la famille ${familyId}`);
-        io.to(familyId.toString()).emit("message", { senderId, content });
-    });
-    socket.on("message", (data) => {
-        console.log(`Message reçu : ${data}`);
-        socket.emit("message", { test: "test" });
-        console.log("Message test envoyé");
+        socket.broadcast.to(familyId.toString()).emit("message", { senderId, content });
     });
 });
 console.log("Serveur WebSocket en cours d'exécution...");
