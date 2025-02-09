@@ -1,7 +1,6 @@
 import express from "express";
 import { Server } from "socket.io";
 import http from "http";
-import { send } from "process";
 
 const PORT = 3000;
 
@@ -42,15 +41,15 @@ io.on("connection", (socket) => {
             data = JSON.parse(data);
         }
 
-        const { familyId, senderId, content } = data;
-        if (!familyId || !senderId || !content) {
+        const { familyId, senderId, senderName,content } = data;
+        if (!familyId || !senderId || !content || !senderName) {
             console.error("Données de message invalides");
             return;
         }
 
-        console.log(`Message reçu : ${content} de ${senderId} pour la famille ${familyId}`);
+        console.log(`Message reçu : ${content} de ${senderId} ${senderName} pour la famille ${familyId}`);
         
-        socket.broadcast.to(familyId.toString()).emit("message", { senderId, content });
+        socket.broadcast.to(familyId.toString()).emit("message", { senderId, senderName, content });
     });
 });
 

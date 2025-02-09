@@ -36,13 +36,13 @@ io.on("connection", (socket) => {
         if (typeof data === 'string') {
             data = JSON.parse(data);
         }
-        const { familyId, senderId, content } = data;
-        if (!familyId || !senderId || !content) {
+        const { familyId, senderId, senderName, content } = data;
+        if (!familyId || !senderId || !content || !senderName) {
             console.error("Données de message invalides");
             return;
         }
-        console.log(`Message reçu : ${content} de ${senderId} pour la famille ${familyId}`);
-        socket.broadcast.to(familyId.toString()).emit("message", { senderId, content });
+        console.log(`Message reçu : ${content} de ${senderId} ${senderName} pour la famille ${familyId}`);
+        socket.broadcast.to(familyId.toString()).emit("message", { senderId, senderName, content });
     });
 });
 console.log("Serveur WebSocket en cours d'exécution...");
