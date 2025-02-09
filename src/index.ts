@@ -41,15 +41,15 @@ io.on("connection", (socket) => {
             data = JSON.parse(data);
         }
 
-        const { familyId, senderId, senderName,content } = data;
-        if (!familyId || !senderId || !content || !senderName) {
+        const { familyId, senderId, senderNom,senderPrenom,content } = data;
+        if (!familyId || !senderId || !content || !senderNom ||!senderPrenom) {
             console.error("Données de message invalides");
             return;
         }
 
-        console.log(`Message reçu : ${content} de ${senderId} ${senderName} pour la famille ${familyId}`);
+        console.log(`Message reçu : ${content} de ${senderId} ${senderPrenom + senderNom} pour la famille ${familyId}`);
         
-        socket.broadcast.to(familyId.toString()).emit("message", { senderId, senderName, content });
+        socket.broadcast.to(familyId.toString()).emit("message", { senderId, senderNom, senderPrenom, content });
     });
 });
 
