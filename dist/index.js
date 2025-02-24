@@ -24,8 +24,9 @@ io.on("connection", (socket) => {
             console.error("ID du chat manquant ou invalide");
             return;
         }
+        socket.data.chatId = chatId; // Stocker l'ID du chat dans socket.data
         socket.join(chatId.toString());
-        console.log(`Socket ${chatId} a rejoint le chat : ${chatId}`);
+        console.log(`Socket ${socket.id} a rejoint le chat : ${chatId}`);
         // Vérifiez les sockets dans la room
         const socketsInRoom = io.sockets.adapter.rooms.get(chatId.toString());
         console.log(`Sockets dans la room ${chatId}:`, socketsInRoom ? Array.from(socketsInRoom) : []);
@@ -36,13 +37,14 @@ io.on("connection", (socket) => {
         if (typeof data === 'string') {
             data = JSON.parse(data);
         }
-        const { chatId, senderId, senderNom, senderPrenom, content } = data;
-        if (!chatId || !senderId || !content || !senderNom || !chatId || !senderPrenom) {
+        const { senderId, senderNom, senderPrenom, content } = data;
+        const chatId = socket.data.chatId;
+        if (!chatId || !senderId || !content || !senderNom || !senderPrenom) {
             console.error("Données de message invalides");
             return;
         }
         console.log(`Message reçu : ${content} de ${senderId} ${senderPrenom + senderNom} pour le chat ${chatId}`);
-        socket.broadcast.to(chatId.toString()).emit("message", { senderId, senderNom, chatId, senderPrenom, content });
+        socket.broadcast.to(chatId.toString()).emit("message", { senderId, senderNom, senderPrenom, chatId, content });
     });
 });
 console.log("Serveur WebSocket en cours d'exécution...");
